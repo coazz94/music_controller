@@ -5,6 +5,7 @@ from .models import Room
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
+
 # Create your views here.
 # Here we write end point /Home etx
 
@@ -14,6 +15,25 @@ class RoomView(generics.ListAPIView):
     queryset = Room.objects.all()
     # how do i convert this to a object, see the class
     serializer_class = RoomSerializer
+
+class GetRoom(APIView):
+    serializer_class = RoomSerializer
+    lookup_url_kwargs = "code"
+
+
+
+    def get(self, request, format=None):
+        code = request.GET.get(self.lookup_url_kwargs)
+        if code != None:
+            room = Room.objects.filter(code = code)
+            if len(room) > 0:
+                data = RoomSerializer(room[0]).data
+                ## TODO Check here if it ever matches the user, because we are comparing a name with a session key
+                ## VIDEO 7 at minute 14
+                data["is_host"] = self.request.session.session_key == room[0].host
+                return Response(data, status=status.HTTP_200_OK)
+            return Response({"Room not Found" : "Invalid Room Code"}, status=status.HTTP_404_NOT_FOUND)
+        return Response({"Bad Request" : "Code Parameter missing"}, status=status.HTTP_404_NOT_FOUND)
 
 
 class CreateRoomView(APIView):
@@ -49,3 +69,12 @@ class CreateRoomView(APIView):
         ## Return a response of the data that was created as sa json object (which we get from the serializer, and return a status)
         return Response({"Bad Request" : "invalid"}, status=status.HTTP_400_BAD_REQUEST)
 
+
+class JoinRoom(APIView):
+
+
+
+    def post(self, request, format=None):
+        if not self.request.session.exists(self.request.session.session_key):
+            self.request.session.create()
+        code = request.data.get("code")
