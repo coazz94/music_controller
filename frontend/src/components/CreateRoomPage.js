@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate, useParams } from "react-router-dom"
 import {
     FormControlLabel,
     FormControl,
@@ -19,6 +19,8 @@ export default function CreateRoomPage() {
         guestCanPause: true,
         votesToSkip: defaultVotes,
     })
+
+    const navigate = useNavigate()
 
     function handleVotesChange(e) {
         setFormInfo((prevData) => {
@@ -40,7 +42,9 @@ export default function CreateRoomPage() {
 
     // Added csrfToken functionality
     function roomCreate() {
+        // use the useNavigate Hook
         let csrfToken = getCookie("csrftoken")
+
         const requestOptions = {
             method: "Post",
             headers: {
@@ -54,7 +58,7 @@ export default function CreateRoomPage() {
         }
         fetch("/api/create-room", requestOptions)
             .then((response) => response.json())
-            .then((data) => console.log(data))
+            .then((data) => navigate(`/room/${data.code}`))
     }
 
     // The following function are copying from
@@ -81,7 +85,7 @@ export default function CreateRoomPage() {
         <>
             <Grid container spacing={1}>
                 <Grid item xs={12} align="center">
-                    <Typography component="" letiant="h4">
+                    <Typography component="" variant="h4">
                         Create A Room
                     </Typography>
                 </Grid>
@@ -134,7 +138,7 @@ export default function CreateRoomPage() {
                 <Grid item xs={12} align="center">
                     <Button
                         color="primary"
-                        letiant="contained"
+                        variant="contained"
                         onClick={roomCreate}
                     >
                         Create A Room
@@ -143,7 +147,7 @@ export default function CreateRoomPage() {
                 <Grid item xs={12} align="center">
                     <Button
                         color="secondary"
-                        letiant="contained"
+                        variant="contained"
                         to="/"
                         component={Link}
                     >
