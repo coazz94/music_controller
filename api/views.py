@@ -17,6 +17,7 @@ class RoomView(generics.ListAPIView):
     serializer_class = RoomSerializer
 
 class GetRoom(APIView):
+
     serializer_class = RoomSerializer
     lookup_url_kwargs = "code"
 
@@ -57,11 +58,13 @@ class CreateRoomView(APIView):
                 room.votes_to_skip = votes_to_skip
                 ## update fields
                 room.save(update_fields=["votes_to_skip", "guest_can_pause"])
+                self.request.session["room_code"] = room.code
                 return Response(RoomSerializer(room).data, status=status.HTTP_200_OK)
             ## create a new room
             else:
                 room = Room(host=host, guest_can_pause=guest_can_pause, votes_to_skip=votes_to_skip)
                 room.save()
+                self.request.session["room_code"] = room.code
                 return Response(RoomSerializer(room).data, status=status.HTTP_201_CREATED)
 
         ## Return a response of the data that was created as sa json object (which we get from the serializer, and return a status)
@@ -70,9 +73,21 @@ class CreateRoomView(APIView):
 
 class JoinRoom(APIView):
 
-
+    lookup_url_kwargs = "code"
 
     def post(self, request, format=None):
         if not self.request.session.exists(self.request.session.session_key):
             self.request.session.create()
-        code = request.data.get("code")
+        ## because post request, use data.get
+        code = request.data.get(self.lookup_url_kwargs)
+        if code != None:
+            room_result = Room.objects.filter(code=code)
+            if len(room_result) > 0:
+                room = room_result[0]
+                ## make a new variable in the users session
+                self.request.session["room_code"] = code
+                return Response({"message": "Room Joined"}, status=status.HTTP_200_OK)
+
+            return Response({"Bad Request": "Invalid Room Code"}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({"Bad Request": "Invalid data, did not find key"}, status=status.HTTP_400_BAD_REQUEST)

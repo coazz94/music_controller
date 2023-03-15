@@ -24,9 +24,9 @@ export default function Room() {
             )
     }
 
-    // useEffect(() => {
-    //     getRoomDetails()
-    // }, [roomCode, setRoomData])
+    useEffect(() => {
+        getRoomDetails()
+    }, [roomCode, setRoomData])
     // useEffect(() => {
     //     getRoomDetails()
     // }, [roomCode])
