@@ -1,3 +1,4 @@
+from django.http import JsonResponse
 from django.shortcuts import render
 from rest_framework import generics, status
 from .serializers import RoomSerializer, CreateRoomSerializer
@@ -15,6 +16,7 @@ class RoomView(generics.ListAPIView):
     queryset = Room.objects.all()
     # how do i convert this to a object, see the class
     serializer_class = RoomSerializer
+
 
 class GetRoom(APIView):
 
@@ -91,3 +93,17 @@ class JoinRoom(APIView):
             return Response({"Bad Request": "Invalid Room Code"}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response({"Bad Request": "Invalid data, did not find key"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserInRoom(APIView):
+
+    def get(self, request, format=None):
+        if not self.request.session.exists(self.request.session.session_key):
+            self.request.session.create()
+
+        data = {
+            "code": self.request.session.get("room_code")
+        }
+
+        ## return a python dic as a jsonObject
+        return JsonResponse(data, status=status.HTTP_200_OK)
