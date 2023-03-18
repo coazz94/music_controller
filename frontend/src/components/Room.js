@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react"
-import { createBrowserRouter, useParams } from "react-router-dom"
+import { createBrowserRouter, useNavigate, useParams } from "react-router-dom"
+import { Grid, Typography, Button } from "@mui/material"
 
-export default function Room() {
+export default function Room({ reset }) {
     const roomCode = useParams().roomCode
     const [roomData, setRoomData] = useState({
         votesToSkip: 2,
@@ -9,9 +10,17 @@ export default function Room() {
         isHost: false,
     })
 
+    const navigate = useNavigate()
+
     function getRoomDetails() {
         fetch(`/api/get-room?code=${roomCode}`)
-            .then((response) => response.json())
+            .then((response) => {
+                if (!response.ok) {
+                    navigate("/")
+                } else {
+                    return response.json()
+                }
+            })
             .then((data) =>
                 setRoomData((prevData) => {
                     return {
@@ -24,19 +33,55 @@ export default function Room() {
             )
     }
 
+    function leaveButtonPressed() {
+        const requestOptions = {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+        }
+
+        fetch("/api/leave-room", requestOptions).then((response) => {
+            if (response.ok) {
+                reset()
+                navigate("/")
+            }
+        })
+    }
+
     useEffect(() => {
         getRoomDetails()
     }, [roomCode, setRoomData])
-    // useEffect(() => {
-    //     getRoomDetails()
-    // }, [roomCode])
 
     return (
-        <>
-            <h3>Room Code: {roomCode}</h3>
-            <p> Votes: {roomData.votesToSkip}</p>
-            <p> Guest Can Pause: {roomData.guestCanPause.toString()}</p>
-            <p> Is HOST: {roomData.isHost.toString()}</p>
-        </>
+        <Grid container spacing={1}>
+            <Grid item xs={12} align="center">
+                <Typography variant="h4" component="h4">
+                    Code: {roomCode}
+                </Typography>
+            </Grid>
+            <Grid item xs={12} align="center">
+                <Typography variant="h6" component="h6">
+                    Votes: {roomData.votesToSkip}
+                </Typography>
+            </Grid>
+            <Grid item xs={12} align="center">
+                <Typography variant="h6" component="h6">
+                    Guest Can Pause: {roomData.guestCanPause.toString()}
+                </Typography>
+            </Grid>
+            <Grid item xs={12} align="center">
+                <Typography variant="h6" component="h6">
+                    Host: {roomData.isHost.toString()}
+                </Typography>
+            </Grid>
+            <Grid item xs={12} align="center">
+                <Button
+                    variant="contained"
+                    color="secondary"
+                    onClick={leaveButtonPressed}
+                >
+                    Leave Room
+                </Button>
+            </Grid>
+        </Grid>
     )
 }

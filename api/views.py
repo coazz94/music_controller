@@ -107,3 +107,18 @@ class UserInRoom(APIView):
 
         ## return a python dic as a jsonObject
         return JsonResponse(data, status=status.HTTP_200_OK)
+
+
+
+class LeaveRoom(APIView):
+    def post(self, request, format=None):
+        if "room_code" in self.request.session:
+            # del self.request.session["room_code"]
+            self.request.session.pop("room_code")
+            host_id = self.request.session.session_key
+            room_results = Room.objects.filter(host=host_id)
+            if len(room_results) > 0:
+                room = room_results[0]
+                room.delete()
+
+        return Response({"message": "success"}, status=status.HTTP_200_OK)

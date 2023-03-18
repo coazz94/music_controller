@@ -14,6 +14,10 @@ export default function Homepage() {
             .then((data) => data !== null && setRoomCode(() => data.code))
     }, [])
 
+    function resetRoomCode() {
+        setRoomCode(() => null)
+    }
+
     return (
         <BrowserRouter>
             <Routes>
@@ -30,7 +34,10 @@ export default function Homepage() {
                 />
                 <Route path="/join" element={<RoomJoinPage />} />
                 <Route path="/create" element={<CreateRoomPage />} />
-                <Route path="/room/:roomCode" element={<Room />} />
+                <Route
+                    path="/room/:roomCode"
+                    element={<Room reset={resetRoomCode} />}
+                />
             </Routes>
         </BrowserRouter>
     )
