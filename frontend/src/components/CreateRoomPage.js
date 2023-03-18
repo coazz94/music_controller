@@ -12,7 +12,7 @@ import {
     Button,
 } from "@mui/material"
 
-export default function CreateRoomPage() {
+export default function CreateRoomPage({ update, votesToSkip, guestCanPause }) {
     const defaultVotes = 2
 
     const [formInfo, setFormInfo] = useState({
@@ -86,7 +86,7 @@ export default function CreateRoomPage() {
             <Grid container spacing={1}>
                 <Grid item xs={12} align="center">
                     <Typography component="" variant="h4">
-                        Create A Room
+                        {update ? "Update A Room" : "Create A Room"}
                     </Typography>
                 </Grid>
                 <Grid item xs={12} align="center">
@@ -98,7 +98,7 @@ export default function CreateRoomPage() {
                         </FormHelperText>
                         <RadioGroup
                             row
-                            defaultValue="true"
+                            defaultValue={update ? guestCanPause : "true"}
                             onChange={handleGuestCanPauseChange}
                         >
                             <FormControlLabel
@@ -121,7 +121,7 @@ export default function CreateRoomPage() {
                         <TextField
                             required={true}
                             type="number"
-                            defaultValue={defaultVotes}
+                            defaultValue={update ? votesToSkip : defaultVotes}
                             inputProps={{
                                 min: 1,
                                 style: { textAlign: "center" },
@@ -144,16 +144,18 @@ export default function CreateRoomPage() {
                         Create A Room
                     </Button>
                 </Grid>
-                <Grid item xs={12} align="center">
-                    <Button
-                        color="secondary"
-                        variant="contained"
-                        to="/"
-                        component={Link}
-                    >
-                        Back
-                    </Button>
-                </Grid>
+                {!update && (
+                    <Grid item xs={12} align="center">
+                        <Button
+                            color="secondary"
+                            variant="contained"
+                            to="/"
+                            component={Link}
+                        >
+                            Back
+                        </Button>
+                    </Grid>
+                )}
             </Grid>
         </>
     )

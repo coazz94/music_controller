@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react"
 import { createBrowserRouter, useNavigate, useParams } from "react-router-dom"
 import { Grid, Typography, Button } from "@mui/material"
+import CreateRoomPage from "./CreateRoomPage"
 
 export default function Room({ reset }) {
     const roomCode = useParams().roomCode
@@ -8,6 +9,7 @@ export default function Room({ reset }) {
         votesToSkip: 2,
         guestCanPause: false,
         isHost: false,
+        showSettings: false,
     })
 
     const navigate = useNavigate()
@@ -47,11 +49,44 @@ export default function Room({ reset }) {
         })
     }
 
+    function updateShowSettings(value) {
+        setRoomData((prevData) => {
+            return { ...prevData, showSettings: value }
+        })
+    }
+
+    function renderSettings() {
+        return (
+            <Grid container spacing={1}>
+                <Grid item xs={12} align="center">
+                    <CreateRoomPage
+                        update={true}
+                        votesToSkip={roomData.votesToSkip}
+                        guestCanPause={roomData.guestCanPause}
+                        // roomCode={roomData.roomCode}
+                        // updateCallback={roomData.getRoomDetails}
+                    />
+                </Grid>
+                <Grid item xs={12} align="center">
+                    <Button
+                        variant="contained"
+                        color="secondary"
+                        onClick={() => updateShowSettings(false)}
+                    >
+                        Close
+                    </Button>
+                </Grid>
+            </Grid>
+        )
+    }
+
     useEffect(() => {
         getRoomDetails()
     }, [roomCode, setRoomData])
 
-    return (
+    return roomData.showSettings ? (
+        renderSettings()
+    ) : (
         <Grid container spacing={1}>
             <Grid item xs={12} align="center">
                 <Typography variant="h4" component="h4">
@@ -73,6 +108,17 @@ export default function Room({ reset }) {
                     Host: {roomData.isHost.toString()}
                 </Typography>
             </Grid>
+            {roomData.isHost && (
+                <Grid item xs={12} align="center">
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={() => updateShowSettings(true)}
+                    >
+                        Settings
+                    </Button>
+                </Grid>
+            )}
             <Grid item xs={12} align="center">
                 <Button
                     variant="contained"
