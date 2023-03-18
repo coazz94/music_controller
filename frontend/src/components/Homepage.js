@@ -6,23 +6,12 @@ import { BrowserRouter, Route, Routes, Link, Navigate } from "react-router-dom"
 import { Grid, Typography, ButtonGroup, Button } from "@mui/material"
 
 export default function Homepage() {
-    const [roomCode, setRoomCode] = useState({
-        roomCode: null,
-    })
+    const [roomCode, setRoomCode] = useState(null)
 
     useEffect(() => {
         fetch("/api/user-in-room")
             .then((response) => response.json())
-            .then(
-                (data) =>
-                    data !== null &&
-                    setRoomCode((prevData) => {
-                        return {
-                            ...prevData,
-                            roomCode: data.code,
-                        }
-                    })
-            )
+            .then((data) => data !== null && setRoomCode(() => data.code))
     }, [])
 
     return (
@@ -31,12 +20,13 @@ export default function Homepage() {
                 <Route
                     exact
                     path="/"
-                    element={<HomepageView roomCode={roomCode} />}
-                    // roomCode.roomCode == null ? (
-                    //     <HomepageView />
-                    // ) : (
-                    //     <Navigate to={`/room/${roomCode.roomCode}`} />
-                    // )
+                    element={
+                        roomCode == null ? (
+                            <HomepageView />
+                        ) : (
+                            <Navigate to={`/room/${roomCode}`} />
+                        )
+                    }
                 />
                 <Route path="/join" element={<RoomJoinPage />} />
                 <Route path="/create" element={<CreateRoomPage />} />
@@ -46,10 +36,8 @@ export default function Homepage() {
     )
 }
 
-function HomepageView({ roomCode }) {
-    // console.log(roomCode)
-
-    return roomCode.roomCode == null ? (
+function HomepageView() {
+    return (
         <Grid container spacing={3}>
             <Grid item xs={12} align="center">
                 <Typography variant="h3" compact="h3">
@@ -71,7 +59,5 @@ function HomepageView({ roomCode }) {
                 </ButtonGroup>
             </Grid>
         </Grid>
-    ) : (
-        <Navigate to={`/room/${roomCode.roomCode}`} />
     )
 }
