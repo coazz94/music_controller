@@ -63,8 +63,11 @@ export default function Room({ reset }) {
                         update={true}
                         votesToSkip={roomData.votesToSkip}
                         guestCanPause={roomData.guestCanPause}
-                        // roomCode={roomData.roomCode}
-                        // updateCallback={roomData.getRoomDetails}
+                        roomCode={roomCode}
+                        updateCallback={() => {
+                            // getRoomDetails(), updateShowSettings(false)
+                            getRoomDetails()
+                        }}
                     />
                 </Grid>
                 <Grid item xs={12} align="center">

@@ -10,15 +10,25 @@ import {
     Typography,
     Grid,
     Button,
+    Collapse,
+    Alert,
 } from "@mui/material"
 
-export default function CreateRoomPage({ update, votesToSkip, guestCanPause }) {
+export default function CreateRoomPage({
+    update,
+    votesToSkip,
+    guestCanPause,
+    roomCode,
+    updateCallback,
+}) {
     const defaultVotes = 2
 
     const [formInfo, setFormInfo] = useState({
         guestCanPause: true,
         votesToSkip: defaultVotes,
     })
+
+    const [errMsg, setErrMsg] = useState("")
 
     const navigate = useNavigate()
 
@@ -61,6 +71,31 @@ export default function CreateRoomPage({ update, votesToSkip, guestCanPause }) {
             .then((data) => navigate(`/room/${data.code}`))
     }
 
+    function updateRoom() {
+        // use the useNavigate Hook
+        // let csrfToken = getCookie("csrftoken")
+        const requestOptions = {
+            method: "Patch",
+            headers: {
+                "Content-Type": "application/json",
+                // "X-CSRFToken": csrfToken,
+            },
+            body: JSON.stringify({
+                votes_to_skip: formInfo.votesToSkip,
+                guest_can_pause: formInfo.guestCanPause,
+                code: roomCode,
+            }),
+        }
+        fetch("/api/update-room", requestOptions).then((response) => {
+            if (response.ok) {
+                setErrMsg(() => "Success")
+            } else {
+                setErrMsg(() => "Error")
+            }
+            updateCallback()
+        })
+    }
+
     // The following function are copying from
     // https://docs.djangoproject.com/en/dev/ref/csrf/#ajax
     function getCookie(name) {
@@ -81,9 +116,74 @@ export default function CreateRoomPage({ update, votesToSkip, guestCanPause }) {
         return cookieValue
     }
 
+    function renderCreateButtons() {
+        return (
+            <Grid container spacing={1}>
+                <Grid item xs={12} align="center">
+                    <Button
+                        color="primary"
+                        variant="contained"
+                        onClick={roomCreate}
+                    >
+                        Create A Room
+                    </Button>
+                </Grid>
+                <Grid item xs={12} align="center">
+                    <Button
+                        color="secondary"
+                        variant="contained"
+                        to="/"
+                        component={Link}
+                    >
+                        Back
+                    </Button>
+                </Grid>
+            </Grid>
+        )
+    }
+
+    function renderUpdateButtons() {
+        return (
+            <Grid container spacing={1}>
+                <Grid item xs={12} align="center">
+                    <Button
+                        color="primary"
+                        variant="contained"
+                        onClick={updateRoom}
+                    >
+                        Update This Room
+                    </Button>
+                </Grid>
+            </Grid>
+        )
+    }
+
     return (
         <>
             <Grid container spacing={1}>
+                <Grid item xs={12} align="center">
+                    <Collapse in={errMsg != ""}>
+                        {errMsg === "Success" ? (
+                            <Alert
+                                severity="success"
+                                onClose={() => {
+                                    setErrMsg(() => "")
+                                }}
+                            >
+                                {errMsg}
+                            </Alert>
+                        ) : (
+                            <Alert
+                                severity="error"
+                                onClose={() => {
+                                    setErrMsg(() => "")
+                                }}
+                            >
+                                {errMsg}
+                            </Alert>
+                        )}
+                    </Collapse>
+                </Grid>
                 <Grid item xs={12} align="center">
                     <Typography component="" variant="h4">
                         {update ? "Update A Room" : "Create A Room"}
@@ -134,28 +234,8 @@ export default function CreateRoomPage({ update, votesToSkip, guestCanPause }) {
                             </div>
                         </FormHelperText>
                     </FormControl>
+                    {update ? renderUpdateButtons() : renderCreateButtons()}
                 </Grid>
-                <Grid item xs={12} align="center">
-                    <Button
-                        color="primary"
-                        variant="contained"
-                        onClick={roomCreate}
-                    >
-                        Create A Room
-                    </Button>
-                </Grid>
-                {!update && (
-                    <Grid item xs={12} align="center">
-                        <Button
-                            color="secondary"
-                            variant="contained"
-                            to="/"
-                            component={Link}
-                        >
-                            Back
-                        </Button>
-                    </Grid>
-                )}
             </Grid>
         </>
     )
