@@ -10,9 +10,30 @@ export default function Room({ reset }) {
         guestCanPause: false,
         isHost: false,
         showSettings: false,
+        spotifyAuth: false,
     })
 
     const navigate = useNavigate()
+
+    function authSpotify() {
+        fetch("/spotify/is_auth")
+            .then((response) => response.json())
+            .then((data) => {
+                setRoomData((prevData) => {
+                    return {
+                        ...prevData,
+                        spotifyAuth: data.status,
+                    }
+                })
+                if (!data.status) {
+                    fetch("/spotify/get-auth-url")
+                        .then((response) => response.json())
+                        .then((data) => {
+                            window.location.replace(data.url)
+                        })
+                }
+            })
+    }
 
     function getRoomDetails() {
         fetch(`/api/get-room?code=${roomCode}`)
@@ -23,7 +44,7 @@ export default function Room({ reset }) {
                     return response.json()
                 }
             })
-            .then((data) =>
+            .then((data) => {
                 setRoomData((prevData) => {
                     return {
                         ...prevData,
@@ -32,7 +53,10 @@ export default function Room({ reset }) {
                         isHost: data.is_host,
                     }
                 })
-            )
+                if (roomData.isHost) {
+                    authSpotify()
+                }
+            })
     }
 
     function leaveButtonPressed() {
