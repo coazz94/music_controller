@@ -163,25 +163,16 @@ export default function CreateRoomPage({
             <Grid container spacing={1}>
                 <Grid item xs={12} align="center">
                     <Collapse in={errMsg != ""}>
-                        {errMsg === "Success" ? (
-                            <Alert
-                                severity="success"
-                                onClose={() => {
-                                    setErrMsg(() => "")
-                                }}
-                            >
-                                {errMsg}
-                            </Alert>
-                        ) : (
-                            <Alert
-                                severity="error"
-                                onClose={() => {
-                                    setErrMsg(() => "")
-                                }}
-                            >
-                                {errMsg}
-                            </Alert>
-                        )}
+                        <Alert
+                            severity={
+                                errMsg === "Success" ? "success" : "error"
+                            }
+                            onClose={() => {
+                                setErrMsg(() => "")
+                            }}
+                        >
+                            {errMsg}
+                        </Alert>
                     </Collapse>
                 </Grid>
                 <Grid item xs={12} align="center">
