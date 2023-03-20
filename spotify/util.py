@@ -43,16 +43,18 @@ def refresh_spotify_token(session_id):
     refresh_token = get_user_tokens(session_id).refresh_token
 
     response = post("https://accounts.spotify.com/api/token", data={
-        'grant_type': 'refresh',
+        'grant_type': 'client_credentials',
         "refresh_token" : refresh_token,
         "redirect_uri" : REDIRECT_URI,
         "client_id" : CLIENT_ID,
         "client_secret" : CLIENT_SECRET
     }).json()
 
+
     access_token = response.get("access_token")
     token_type = response.get("token_type")
     refresh_token = response.get("token_type")
     expires_in = response.get("expires_in")
 
-    update_or_create_user_tokens(session_id, access_token, expires_in, refresh_token, token_type)
+
+    update_or_create_user_tokens(session_id, access_token, token_type, expires_in, refresh_token)
