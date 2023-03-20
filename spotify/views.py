@@ -47,8 +47,7 @@ def spotify_callback(request, format= None):
     update_or_create_user_tokens(request.session.session_key,access_token, token_type, expires_in, refresh_token)
 
     ## redirect to front, put name of app and than page you want to go to frontend:room ( for the room page)
-    # return redirect("frontend:home")
-    return True
+    return redirect("frontend:home")
 
 class isAuthenticated(APIView):
     def get(self, request, format=None):
