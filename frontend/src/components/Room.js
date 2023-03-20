@@ -26,6 +26,7 @@ export default function Room({ reset }) {
                     }
                 })
                 if (!data.status) {
+                    // console.log(data.status)
                     fetch("/spotify/get-auth-url")
                         .then((response) => response.json())
                         .then((data) => {
@@ -53,8 +54,9 @@ export default function Room({ reset }) {
                         isHost: data.is_host,
                     }
                 })
-                if (roomData.isHost) {
+                if (data.is_host) {
                     authSpotify()
+                    // console.log("here")
                 }
             })
     }

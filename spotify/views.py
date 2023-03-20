@@ -12,6 +12,7 @@ class AuthUrl(APIView):
         ## things we want from spotify, spotify-dev site
         scopes = "user-read-playback-state user-modify-playback-state user-read-currently-playing"
 
+        ## prepare the url for the login of the user
         url = Request("GET", "https://accounts.spotify.com/authorize", params={
             "scope" : scopes,
             "response_type" : "code",
@@ -46,7 +47,8 @@ def spotify_callback(request, format= None):
     update_or_create_user_tokens(request.session.session_key,access_token, token_type, expires_in, refresh_token)
 
     ## redirect to front, put name of app and than page you want to go to frontend:room ( for the room page)
-    return redirect("frontend:home")
+    # return redirect("frontend:home")
+    return True
 
 class isAuthenticated(APIView):
     def get(self, request, format=None):
