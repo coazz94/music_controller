@@ -29,7 +29,6 @@ def spotify_callback(request, format= None):
     code = request.GET.get("code")
     error = request.GET.get("error")
 
-
     response = post("https://accounts.spotify.com/api/token", data={
         'grant_type': 'authorization_code',
         'code': code,
@@ -69,4 +68,31 @@ class CurrentSong(APIView):
         endpoint = "player/currently-playing"
         response = execute_spotify_api_request(host, endpoint)
 
-        return Response(response, status=status.HTTP_200_OK)
+        if "error" in response or "item" not in response:
+            return Response({"error" : "no Content in Response"}, status=status.HTTP_204_NO_CONTENT)
+
+
+        item = response.get("item")
+        album_cover = item.get("album").get("images")[0].get("url")
+        artist_string = ""
+
+
+        for i, artist in enumerate(item.get('artists')):
+            if i > 0:
+                artist_string += ", "
+            name = artist.get('name')
+            artist_string += name
+
+        song = {
+            'title': item.get('name'),
+            'artist': artist_string,
+            'duration': item.get("duration_ms"),
+            'time': item.get("progress_ms"),
+            'image_url': album_cover,
+            'is_playing': response.get("is_playing"),
+            'votes': 0,
+            'id': item.get("id")
+        }
+
+
+        return Response(song, status=status.HTTP_200_OK)

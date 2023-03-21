@@ -11,6 +11,7 @@ export default function Room({ reset }) {
         isHost: false,
         showSettings: false,
         spotifyAuth: false,
+        song: {},
     })
 
     const navigate = useNavigate()
@@ -108,8 +109,26 @@ export default function Room({ reset }) {
         )
     }
 
+    function getCurrentSong() {
+        fetch("/spotify/current-song")
+            .then((response) => {
+                if (!response.ok) {
+                    console.log("not working")
+                }
+                return response.json()
+            })
+            .then((data) =>
+                setRoomData((prevData) => {
+                    return {
+                        ...prevData,
+                        song: data,
+                    }
+                })
+            )
+    }
+
     useEffect(() => {
-        getRoomDetails()
+        getRoomDetails(), getCurrentSong()
     }, [roomCode, setRoomData])
 
     return roomData.showSettings ? (
@@ -121,6 +140,7 @@ export default function Room({ reset }) {
                     Code: {roomCode}
                 </Typography>
             </Grid>
+            <Grid>{roomData.song.artist}</Grid>
             <Grid item xs={12} align="center">
                 <Typography variant="h6" component="h6">
                     Votes: {roomData.votesToSkip}
