@@ -3,7 +3,7 @@ from .credentials import REDIRECT_URI, CLIENT_ID, CLIENT_SECRET
 from rest_framework.views import APIView, status
 from rest_framework.response import Response
 from requests import Request, post
-from .util import update_or_create_user_tokens,check_for_session, is_spotify_auth, execute_spotify_api_request
+from .util import *
 from api.models import Room
 
 
@@ -68,6 +68,7 @@ class CurrentSong(APIView):
         endpoint = "player/currently-playing"
         response = execute_spotify_api_request(host, endpoint)
 
+
         if "error" in response or "item" not in response:
             return Response({"error" : "no Content in Response"}, status=status.HTTP_204_NO_CONTENT)
 
@@ -87,7 +88,7 @@ class CurrentSong(APIView):
             'title': item.get('name'),
             'artist': artist_string,
             'duration': item.get("duration_ms"),
-            'time': item.get("progress_ms"),
+            'time': response.get("progress_ms"),
             'image_url': album_cover,
             'is_playing': response.get("is_playing"),
             'votes': 0,
@@ -96,3 +97,28 @@ class CurrentSong(APIView):
 
 
         return Response(song, status=status.HTTP_200_OK)
+
+
+
+class PauseSong(APIView):
+    def put(self, request, format=None):
+        room_code = self.request.session.get("room_code")
+        room = Room.objects.filter(code = room_code)[0]
+
+        if self.request.session.session_key == room.host or room.guest_can_pause:
+            pause_song(room.host)
+            return Response({}, status=status.HTTP_204_NO_CONTENT)
+
+        return Response({}, status=status.HTTP_403_FORBIDDEN)
+
+
+class PlaySong(APIView):
+    def put(self, request, format=None):
+        room_code = self.request.session.get("room_code")
+        room = Room.objects.filter(code = room_code)[0]
+
+        if self.request.session.session_key == room.host or room.guest_can_pause:
+            play_song(room.host)
+            return Response({}, status=status.HTTP_204_NO_CONTENT)
+
+        return Response({}, status=status.HTTP_403_FORBIDDEN)

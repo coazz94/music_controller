@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react"
 import { createBrowserRouter, useNavigate, useParams } from "react-router-dom"
 import { Grid, Typography, Button } from "@mui/material"
 import CreateRoomPage from "./CreateRoomPage"
+import MusicPlayer from "./MusicPlayer"
 
 export default function Room({ reset }) {
     const roomCode = useParams().roomCode
@@ -140,7 +141,7 @@ export default function Room({ reset }) {
                     Code: {roomCode}
                 </Typography>
             </Grid>
-            <Grid>{roomData.song.artist}</Grid>
+            <MusicPlayer song={roomData.song} />
             <Grid item xs={12} align="center">
                 <Typography variant="h6" component="h6">
                     Votes: {roomData.votesToSkip}
